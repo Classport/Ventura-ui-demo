@@ -1,0 +1,682 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Ventura – Hospital Questionnaire UI (Prototype v2)</title>
+  <style>
+    :root{
+      --navy:#0A2540;
+      --accent:#2BB0ED;
+      --bg:#F8FAFC;
+      --card:#FFFFFF;
+      --text:#111827;
+      --muted:#4A5568;
+      --border:#E2E8F0;
+      --success:#2E7D32;
+      --warn:#F9A825;
+      --gray:#CBD5E1;
+      --shadow: 0 10px 28px rgba(15,23,42,.08);
+      --radius:12px;
+      --pad:20px;
+      --font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, "Noto Sans", "Helvetica Neue", sans-serif;
+    }
+    *{box-sizing:border-box}
+    body{margin:0; font-family:var(--font); background:var(--bg); color:var(--text);}
+    .topbar{
+      height:64px; background:var(--card); border-bottom:1px solid var(--border);
+      position:sticky; top:0; z-index:20;
+      display:flex; align-items:center;
+    }
+    .topbar .inner{
+      width:100%; padding:0 18px; display:flex; align-items:center; gap:14px;
+    }
+    .logo{display:flex; align-items:center; gap:10px; font-weight:800; color:var(--navy);}
+    .mark{width:28px; height:28px; border-radius:8px; background:linear-gradient(135deg,var(--navy),var(--accent));}
+    .envpill{
+      font-size:12px; padding:6px 10px; border-radius:999px; border:1px solid var(--border);
+      color:var(--muted); background:#fff;
+    }
+    .title{flex:1; text-align:center; font-weight:650; color:var(--navy);}
+    .user{display:flex; align-items:center; gap:10px; color:var(--muted); font-size:13px;}
+    .avatar{width:28px; height:28px; border-radius:999px; background:var(--gray);}
+    .layout{
+      display:grid;
+      grid-template-columns: 300px 1fr;
+      min-height: calc(100vh - 64px);
+    }
+    .sidebar{
+      border-right:1px solid var(--border);
+      background: linear-gradient(180deg,#ffffff 0%, #fbfdff 100%);
+      padding:16px;
+      position:sticky;
+      top:64px;
+      height: calc(100vh - 64px);
+      overflow:auto;
+    }
+    .content{
+      padding:18px 18px 96px;
+      max-width: 1200px;
+    }
+    .card{
+      background:var(--card); border:1px solid var(--border); border-radius:var(--radius);
+      box-shadow: var(--shadow);
+    }
+    .card.pad{padding:var(--pad);}
+    h1{font-size:18px; margin:0 0 8px;}
+    h2{font-size:14px; margin:0 0 8px;}
+    .sub{font-size:13px; color:var(--muted); line-height:1.4}
+    .small{font-size:12px; color:var(--muted);}
+    .navgroup{margin-top:12px}
+    .navtitle{font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; margin:14px 0 8px;}
+    .navitem{
+      display:flex; align-items:center; justify-content:space-between;
+      padding:10px 10px; border-radius:10px; cursor:pointer;
+      border:1px solid transparent;
+    }
+    .navitem:hover{background:#F3F7FB; border-color:#EDF2F7;}
+    .navitem.active{background:#E9F6FE; border-color:#CFEAFE;}
+    .navleft{display:flex; align-items:center; gap:10px; min-width:0}
+    .dot{width:10px; height:10px; border-radius:999px;}
+    .dot.green{background:var(--success)}
+    .dot.amber{background:var(--warn)}
+    .dot.gray{background:var(--gray)}
+    .navlabel{font-size:13px; font-weight:650; color:var(--navy); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+    .badge{
+      font-size:11px; padding:4px 8px; border-radius:999px; border:1px solid var(--border);
+      background:#fff; color:var(--muted);
+    }
+    .badge.submitted{color:var(--success)}
+    .badge.draft{color:#8a5a00}
+    .badge.new{color:#64748B}
+    .search{
+      display:flex; gap:10px; align-items:center;
+      background:#fff; border:1px solid var(--border); border-radius:12px; padding:10px 12px;
+      margin-top:10px;
+    }
+    .search input{
+      border:none; outline:none; width:100%; font-size:13px; font-family:var(--font);
+    }
+    .filters{display:flex; gap:8px; flex-wrap:wrap; margin-top:10px;}
+    .chip{
+      cursor:pointer; user-select:none;
+      font-size:12px; padding:6px 10px; border-radius:999px;
+      border:1px solid var(--border); background:#fff; color:var(--muted);
+    }
+    .chip.active{border-color:#CFEAFE; background:#E9F6FE; color:var(--navy); font-weight:650;}
+    .progress{
+      margin-top:14px; padding:12px; border-radius:12px; border:1px solid var(--border); background:#fff;
+    }
+    .bar{height:6px; background:var(--border); border-radius:999px; overflow:hidden; margin:8px 0;}
+    .bar > div{height:100%; background:var(--accent); width:48%;}
+    .btn{
+      border:1px solid var(--border); background:#fff; color:var(--navy);
+      padding:10px 12px; border-radius:10px; cursor:pointer; font-weight:650; font-size:13px;
+    }
+    .btn.primary{background:var(--accent); border-color:var(--accent); color:#fff;}
+    .btn.link{border:none; background:transparent; color:var(--accent); padding:6px 8px;}
+    .btn:active{transform:translateY(1px)}
+    .row{display:flex; gap:12px; flex-wrap:wrap; align-items:center;}
+    .spacer{height:14px}
+    .crumb{font-size:12px; color:var(--muted); margin-bottom:10px}
+    .helpbox{
+      display:none; margin-top:10px; padding:12px; border-radius:12px;
+      border:1px dashed var(--border); color:var(--muted); background:#fbfdff; font-size:13px;
+    }
+    .upload{
+      border:2px dashed var(--border); border-radius:12px; padding:16px; text-align:center; color:var(--muted);
+      background:#fbfdff;
+    }
+    .hintchips{display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin-top:10px}
+    .hintchips span{border:1px solid var(--border); background:#fff; padding:6px 10px; border-radius:999px; font-size:12px;}
+    .files{margin-top:12px}
+    .file{
+      display:flex; align-items:flex-start; justify-content:space-between;
+      padding:12px 14px; border:1px solid var(--border); border-radius:12px; margin-top:10px; background:#fff;
+    }
+    .fname{font-weight:700; font-size:13px}
+    .fmeta{font-size:12px; color:var(--muted); margin-top:2px}
+    .actions{display:flex; gap:8px}
+    .pill{
+      font-size:12px; padding:4px 10px; border-radius:999px; border:1px solid var(--border); background:#fff; color:var(--muted);
+    }
+    .pill.req{border-color:#CFEAFE; background:#E9F6FE; color:var(--navy); font-weight:700;}
+    .banner{
+      margin-top:14px; background:#F1F9FF; border:1px solid #CFEAFE; border-left:4px solid var(--accent);
+      padding:14px 16px; border-radius:12px; color:var(--navy);
+    }
+    textarea{
+      width:100%; min-height:90px; padding:12px; border:1px solid var(--border);
+      border-radius:12px; resize:vertical; font-family:var(--font); font-size:13px;
+    }
+    .sticky{
+      position:fixed; left:300px; right:0; bottom:0;
+      background:rgba(248,250,252,.92); backdrop-filter: blur(10px);
+      border-top:1px solid var(--border); padding:12px 18px; z-index:30;
+    }
+    .sticky .inner{max-width:1200px; display:flex; justify-content:space-between; gap:12px; margin:0;}
+    .screen{display:none}
+    .screen.active{display:block}
+
+    /* Questions list */
+    .qlist{margin-top:10px}
+    .qcard{
+      padding:14px; border-radius:12px; border:1px solid var(--border); background:#fff;
+      display:flex; align-items:flex-start; justify-content:space-between; gap:12px;
+    }
+    .qcard + .qcard{margin-top:10px}
+    .qinfo{min-width:0}
+    .qname{font-weight:750; font-size:14px; color:var(--navy); margin:0}
+    .qdesc{margin:4px 0 0; font-size:12px; color:var(--muted); line-height:1.35}
+    .qright{display:flex; align-items:center; gap:10px}
+    .kebab{width:34px; height:34px; border-radius:10px; border:1px solid var(--border); background:#fff; cursor:pointer;}
+    .kebab:after{content:"⋯"; font-size:18px; color:var(--muted); display:block; text-align:center; line-height:32px;}
+
+    @media (max-width: 980px){
+      .layout{grid-template-columns:1fr}
+      .sidebar{position:relative; top:0; height:auto}
+      .sticky{left:0}
+      .title{text-align:left}
+    }
+  </style>
+</head>
+<body>
+
+  <div class="topbar">
+    <div class="inner">
+      <div class="logo"><div class="mark"></div>Ventura</div>
+      <span class="envpill">Context: JCI Edition 8</span>
+      <div class="title" id="topTitle">Hospital Questionnaire – Evidence Submission</div>
+      <div class="user"><span>Sunrise Hospital</span><div class="avatar"></div></div>
+    </div>
+  </div>
+
+  <div class="layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="card pad" style="box-shadow:none;">
+        <h2 style="margin:0 0 6px;">Assessment Navigator</h2>
+        <div class="small">Complete sections at your pace. Upload evidence; Ventura reviews later.</div>
+
+        <div class="search">
+          <span style="color:var(--muted);">🔎</span>
+          <input id="searchBox" placeholder="Search questions (e.g., fire drill, CAPA, discharge)..." oninput="renderQuestions()"/>
+        </div>
+
+        <div class="filters">
+          <span class="chip active" data-filter="all" onclick="setFilter('all', this)">All</span>
+          <span class="chip" data-filter="submitted" onclick="setFilter('submitted', this)">Submitted</span>
+          <span class="chip" data-filter="draft" onclick="setFilter('draft', this)">Draft</span>
+          <span class="chip" data-filter="new" onclick="setFilter('new', this)">Not started</span>
+        </div>
+
+        <div class="progress">
+          <div class="row" style="justify-content:space-between;">
+            <div class="small"><b>Overall progress</b></div>
+            <div class="small" id="progText">12 / 25 questions</div>
+          </div>
+          <div class="bar"><div id="progBar"></div></div>
+          <div class="small">Status reflects submission progress, not compliance.</div>
+        </div>
+
+        <div class="navgroup">
+          <div class="navtitle">ISR Dimensions (7)</div>
+
+          <div class="navitem active" onclick="gotoDim('FMS', this)">
+            <div class="navleft"><span class="dot amber"></span><span class="navlabel">ISR-6 FMS</span></div>
+            <span class="badge draft">In progress</span>
+          </div>
+
+          <div class="navitem" onclick="gotoDim('GLD', this)">
+            <div class="navleft"><span class="dot green"></span><span class="navlabel">ISR-1 Governance</span></div>
+            <span class="badge submitted">Submitted</span>
+          </div>
+
+          <div class="navitem" onclick="gotoDim('AAC', this)">
+            <div class="navleft"><span class="dot gray"></span><span class="navlabel">ISR-2 Clinical</span></div>
+            <span class="badge new">Not started</span>
+          </div>
+
+          <div class="navitem" onclick="gotoDim('QPS', this)">
+            <div class="navleft"><span class="dot gray"></span><span class="navlabel">ISR-3 Safety</span></div>
+            <span class="badge new">Not started</span>
+          </div>
+
+          <div class="navitem" onclick="gotoDim('SQE', this)">
+            <div class="navleft"><span class="dot gray"></span><span class="navlabel">ISR-4 Workforce</span></div>
+            <span class="badge new">Not started</span>
+          </div>
+
+          <div class="navitem" onclick="gotoDim('MMU', this)">
+            <div class="navleft"><span class="dot gray"></span><span class="navlabel">ISR-5 Medication</span></div>
+            <span class="badge new">Not started</span>
+          </div>
+
+          <div class="navitem" onclick="gotoDim('MOI', this)">
+            <div class="navleft"><span class="dot gray"></span><span class="navlabel">ISR-7 Information</span></div>
+            <span class="badge new">Not started</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="content">
+      <!-- Screen: Questions list -->
+      <section class="screen active" id="screenList">
+        <div class="card pad">
+          <div class="row" style="justify-content:space-between;">
+            <div>
+              <div class="crumb" id="crumbDim">ISR-6 › Facility Management & Safety</div>
+              <h1 id="dimTitle">Facility Management & Safety (FMS)</h1>
+              <div class="sub" id="dimDesc">Answer by uploading evidence. You can save drafts and submit later.</div>
+            </div>
+            <div class="row">
+              <button class="btn" onclick="gotoSummary()">Section Summary</button>
+              <button class="btn primary" onclick="openFirst()">Continue</button>
+            </div>
+          </div>
+
+          <div class="spacer"></div>
+
+          <div class="row" style="justify-content:space-between;">
+            <div class="small" id="listCount">Showing 0 questions</div>
+            <div class="row">
+              <span class="pill">View: Questions</span>
+              <button class="btn" onclick="gotoSummary()">Summary</button>
+            </div>
+          </div>
+
+          <div class="qlist" id="qList"></div>
+        </div>
+      </section>
+
+      <!-- Screen: Question detail -->
+      <section class="screen" id="screenDetail">
+        <div class="card pad">
+          <div class="crumb" id="detailCrumb">Facility Management & Safety › Medical Equipment</div>
+          <div class="row" style="justify-content:space-between; align-items:flex-start;">
+            <div style="min-width:0;">
+              <h1 id="detailTitle" style="margin-bottom:6px;">Question title</h1>
+              <div class="row">
+                <span class="pill req" id="detailRequired">Primary Evidence Required</span>
+                <span class="pill" id="detailStatusPill">Status: Draft</span>
+              </div>
+            </div>
+            <div class="row">
+              <button class="btn" onclick="gotoList()">Back to list</button>
+              <button class="btn" onclick="toggleHelp()">What does this mean?</button>
+            </div>
+          </div>
+
+          <div class="helpbox" id="helpBox">
+            Upload documents that directly demonstrate this requirement. If you have related minutes, logs, or dashboards, add them as secondary evidence.
+          </div>
+
+          <div class="spacer"></div>
+
+          <h2>Primary Evidence <span class="pill req" style="margin-left:8px;">Required</span></h2>
+          <div class="sub">Upload documents that directly demonstrate this requirement.</div>
+          <div class="spacer"></div>
+
+          <div class="upload">
+            <div style="font-weight:800; color:var(--navy);">Drag & drop files here</div>
+            <div class="sub" style="margin-top:6px;">or <button class="btn link" onclick="addFile('primary')">browse</button> (PDF, DOCX, XLSX, JPG, PNG)</div>
+            <div class="hintchips" id="primaryHints"></div>
+          </div>
+
+          <div class="files" id="primaryFiles"></div>
+
+          <div class="spacer"></div>
+
+          <h2>Secondary Evidence <span class="pill" style="margin-left:8px;">Optional</span></h2>
+          <div class="sub">Helpful supporting documents, if available.</div>
+          <div class="spacer"></div>
+
+          <div class="upload">
+            <div style="font-weight:800; color:var(--navy);">Add supporting evidence</div>
+            <div class="sub" style="margin-top:6px;">or <button class="btn link" onclick="addFile('secondary')">browse</button></div>
+          </div>
+
+          <div class="files" id="secondaryFiles"></div>
+
+          <div class="spacer"></div>
+
+          <h2>Optional note</h2>
+          <div class="sub">Add context if the document naming or scope needs explanation (max 300 characters).</div>
+          <div class="spacer"></div>
+          <textarea id="noteBox" placeholder="Optional: e.g., logs cover ICU + Radiology; OT handled separately."></textarea>
+
+          <div class="banner" id="saveBanner" style="display:none;">
+            <b>Saved.</b> Your evidence and notes are stored as a draft. You can submit when ready.
+          </div>
+        </div>
+
+        <div class="sticky">
+          <div class="inner">
+            <button class="btn" onclick="saveDraft()">Save draft</button>
+            <div class="row" style="justify-content:flex-end; flex:1;">
+              <button class="btn" onclick="gotoList()">Save & back to list</button>
+              <button class="btn primary" onclick="submitQuestion()">Submit evidence</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen: Summary -->
+      <section class="screen" id="screenSummary">
+        <div class="card pad">
+          <div class="row" style="justify-content:space-between;">
+            <div>
+              <div class="crumb" id="sumCrumb">ISR-6 › Facility Management & Safety</div>
+              <h1>Section Summary</h1>
+              <div class="sub">This summary shows submission status only. Compliance evaluation happens after submission.</div>
+            </div>
+            <div class="row">
+              <button class="btn" onclick="gotoList()">Back to questions</button>
+              <button class="btn primary" onclick="alert('Prototype: proceed to next dimension')">Proceed to next dimension</button>
+            </div>
+          </div>
+
+          <div class="spacer"></div>
+          <div id="summaryTable"></div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+<script>
+  // Simple data model (prototype)
+  const dims = {
+    FMS:{label:"ISR-6 › Facility Management & Safety", title:"Facility Management & Safety (FMS)",
+      desc:"Answer by uploading evidence. You can save drafts and submit later."},
+    GLD:{label:"ISR-1 › Governance, Leadership & Accountability", title:"Governance (GLD)",
+      desc:"Upload governance evidence such as meeting minutes, charters, risk registers."},
+    AAC:{label:"ISR-2 › Clinical Process & Continuity", title:"Clinical Process (AAC/COP)",
+      desc:"Upload patient record samples, templates, policies, and audits."},
+    QPS:{label:"ISR-3 › Patient Safety & Incident Intelligence", title:"Patient Safety (QPS/IPSG)",
+      desc:"Upload incident logs, RCA/CAPA, trend reviews, and audit results."},
+    SQE:{label:"ISR-4 › Workforce Capability & Credentialing", title:"Workforce (SQE)",
+      desc:"Upload HR files, credentialing, privileges, competency and training records."},
+    MMU:{label:"ISR-5 › Medication Management", title:"Medication Management (MMU)",
+      desc:"Upload formularies, medication policies, error logs, audits, and storage evidence."},
+    MOI:{label:"ISR-7 › Information Management", title:"Information Management (MOI)",
+      desc:"Upload document control, access reviews, record audits, downtime procedures."}
+  };
+
+  // Prototype questions for FMS + few for other dims
+  const questions = [
+    // FMS
+    {id:"FMS-01", dim:"FMS", area:"FMS Program", title:"Is there a documented facility management & safety program?", helper:"Upload the current FMS program document and evidence of approval.", hints:["FMS program document","Approval page/minutes","Scope statement"], status:"submitted", primary:["FMS_Program_v3.pdf"], secondary:["Safety_Committee_Minutes_Jan.pdf"], note:""},
+    {id:"FMS-02", dim:"FMS", area:"Medical Equipment", title:"Is a medical equipment inventory maintained and current?", helper:"Upload the latest equipment inventory and evidence it is maintained.", hints:["Equipment inventory register","Asset master list export","Revision history"], status:"draft", primary:["Equipment_Inventory.xlsx"], secondary:[], note:""},
+    {id:"FMS-03", dim:"FMS", area:"Medical Equipment", title:"Are preventive maintenance schedules defined for critical equipment?", helper:"Upload PM schedules/work orders for critical equipment.", hints:["PM schedule","Work orders/CMMS extract","Critical equipment list"], status:"draft", primary:[], secondary:[], note:""},
+    {id:"FMS-04", dim:"FMS", area:"Medical Equipment", title:"Are equipment breakdowns recorded, reviewed, and addressed?", helper:"Upload breakdown logs, trend reports, and CAPA closure evidence.", hints:["Breakdown log","Trend analysis report","CAPA tracker"], status:"draft", primary:["Breakdown_Log_Q3.xlsx"], secondary:[], note:""},
+    {id:"FMS-05", dim:"FMS", area:"Utilities", title:"Are critical utilities identified and maintained (power/water/gases/HVAC)?", helper:"Upload critical utilities list and maintenance/monitoring records.", hints:["Critical utilities list","Maintenance logs","Uptime/incident reports"], status:"new", primary:[], secondary:[], note:""},
+    {id:"FMS-06", dim:"FMS", area:"Fire Safety", title:"Is a documented fire safety plan in place and drills conducted?", helper:"Upload fire plan, drill reports, and action closure evidence.", hints:["Fire safety plan","Drill reports","Action tracker"], status:"new", primary:[], secondary:[], note:""},
+    {id:"FMS-07", dim:"FMS", area:"Disaster Preparedness", title:"Is a disaster management plan in place and drills evaluated?", helper:"Upload disaster plan, drill schedules, and review outcomes.", hints:["Disaster plan","Drill schedule","Evaluation notes"], status:"submitted", primary:["Disaster_Plan_2025.pdf"], secondary:["Disaster_Drill_Report_Dec.pdf"], note:""},
+    // GLD (sample)
+    {id:"GLD-01", dim:"GLD", area:"Governance", title:"Is there a formally constituted governing body and documented responsibilities?", helper:"Upload board charter and role assignment evidence.", hints:["Board charter","Org chart","Role descriptions"], status:"submitted", primary:["Board_Charter.pdf"], secondary:["Org_Chart.png"], note:""},
+    {id:"GLD-02", dim:"GLD", area:"Governance", title:"Are quality & safety issues reviewed by leadership and tracked to closure?", helper:"Upload leadership minutes and action trackers.", hints:["Leadership minutes","Action tracker","QPS dashboards"], status:"draft", primary:["Leadership_Minutes_Q4.pdf"], secondary:[], note:""},
+  ];
+
+  let currentDim = "FMS";
+  let currentFilter = "all";
+  let currentQId = null;
+
+  function setFilter(f, el){
+    currentFilter = f;
+    document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+    el.classList.add('active');
+    renderQuestions();
+  }
+
+  function gotoDim(dim, el){
+    currentDim = dim;
+    document.querySelectorAll('.navitem').forEach(n=>n.classList.remove('active'));
+    el.classList.add('active');
+    gotoList();
+    renderQuestions();
+    const d = dims[dim];
+    document.getElementById('crumbDim').textContent = d.label;
+    document.getElementById('dimTitle').textContent = d.title;
+    document.getElementById('dimDesc').textContent = d.desc;
+    document.getElementById('sumCrumb').textContent = d.label;
+  }
+
+  function gotoList(){
+    showScreen('screenList');
+    document.getElementById('topTitle').textContent = 'Hospital Questionnaire – Evidence Submission';
+    currentQId = null;
+    renderQuestions();
+    updateProgress();
+  }
+
+  function openFirst(){
+    const list = getFilteredQuestions();
+    if(list.length) openQuestion(list[0].id);
+  }
+
+  function showScreen(id){
+    document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    window.scrollTo({top:0});
+  }
+
+  function getFilteredQuestions(){
+    const q = document.getElementById('searchBox').value.trim().toLowerCase();
+    return questions.filter(x=>{
+      if(x.dim !== currentDim) return false;
+      if(currentFilter !== "all" && x.status !== currentFilter) return false;
+      if(q && !(x.title.toLowerCase().includes(q) || x.area.toLowerCase().includes(q))) return false;
+      return true;
+    });
+  }
+
+  function statusBadge(status){
+    if(status==="submitted") return '<span class="badge submitted">Submitted</span>';
+    if(status==="draft") return '<span class="badge draft">Draft</span>';
+    return '<span class="badge new">Not started</span>';
+  }
+
+  function renderQuestions(){
+    const list = getFilteredQuestions();
+    const el = document.getElementById('qList');
+    el.innerHTML = "";
+    document.getElementById('listCount').textContent = `Showing ${list.length} questions`;
+    list.forEach(item=>{
+      const wrap = document.createElement('div');
+      wrap.className = 'qcard';
+      wrap.innerHTML = `
+        <div class="qinfo">
+          <div class="small">${item.area}</div>
+          <p class="qname">${item.title}</p>
+          <p class="qdesc">${item.helper}</p>
+        </div>
+        <div class="qright">
+          ${statusBadge(item.status)}
+          <button class="btn" onclick="openQuestion('${item.id}')">Open</button>
+          <button class="kebab" onclick="alert('Prototype: question actions')"></button>
+        </div>
+      `;
+      el.appendChild(wrap);
+    });
+    updateProgress();
+  }
+
+  function openQuestion(id){
+    currentQId = id;
+    const item = questions.find(x=>x.id===id);
+    if(!item) return;
+    showScreen('screenDetail');
+    document.getElementById('topTitle').textContent = 'Respond – Upload Evidence';
+    document.getElementById('detailCrumb').textContent = `${dims[item.dim].title} › ${item.area}`;
+    document.getElementById('detailTitle').textContent = item.title;
+    document.getElementById('helpBox').style.display = 'none';
+    document.getElementById('noteBox').value = item.note || "";
+    document.getElementById('saveBanner').style.display = 'none';
+
+    const statusText = item.status==="submitted" ? "Submitted" : (item.status==="draft" ? "Draft" : "Not started");
+    document.getElementById('detailStatusPill').textContent = `Status: ${statusText}`;
+
+    // Hints
+    const hints = document.getElementById('primaryHints');
+    hints.innerHTML = "";
+    item.hints.forEach(h=>{
+      const s=document.createElement('span');
+      s.textContent = h;
+      hints.appendChild(s);
+    });
+
+    // Files
+    renderFiles();
+  }
+
+  function renderFiles(){
+    const item = questions.find(x=>x.id===currentQId);
+    const p = document.getElementById('primaryFiles');
+    const s = document.getElementById('secondaryFiles');
+    p.innerHTML = "";
+    s.innerHTML = "";
+
+    function fileRow(name, kind){
+      const div = document.createElement('div');
+      div.className = 'file';
+      div.innerHTML = `
+        <div>
+          <div class="fname">${name}</div>
+          <div class="fmeta">${kind} evidence • Uploaded on 06/02/2026</div>
+        </div>
+        <div class="actions">
+          <button class="btn" onclick="alert('Prototype: Replace file')">Replace</button>
+          <button class="btn" onclick="removeFile('${kind}','${name.replace(/'/g,"")}')">Remove</button>
+        </div>
+      `;
+      return div;
+    }
+
+    (item.primary||[]).forEach(fn=>p.appendChild(fileRow(fn,"Primary")));
+    if(!(item.primary||[]).length){
+      const empty=document.createElement('div');
+      empty.className='small';
+      empty.textContent='No primary files uploaded yet.';
+      p.appendChild(empty);
+    }
+
+    (item.secondary||[]).forEach(fn=>s.appendChild(fileRow(fn,"Secondary")));
+    if(!(item.secondary||[]).length){
+      const empty=document.createElement('div');
+      empty.className='small';
+      empty.textContent='No secondary files uploaded yet.';
+      s.appendChild(empty);
+    }
+  }
+
+  function addFile(which){
+    const item = questions.find(x=>x.id===currentQId);
+    const name = which==='primary' ? `Primary_Evidence_${(item.primary.length+1)}.pdf` : `Secondary_Evidence_${(item.secondary.length+1)}.pdf`;
+    if(which==='primary') item.primary.push(name);
+    else item.secondary.push(name);
+
+    // any upload moves new -> draft unless already submitted
+    if(item.status!=='submitted') item.status='draft';
+    document.getElementById('detailStatusPill').textContent = `Status: ${item.status==='draft'?'Draft':'Submitted'}`;
+    renderFiles();
+    saveDraft(true);
+  }
+
+  function removeFile(kind, name){
+    const item = questions.find(x=>x.id===currentQId);
+    if(kind==="Primary") item.primary = item.primary.filter(x=>x!==name);
+    else item.secondary = item.secondary.filter(x=>x!==name);
+    if(item.status!=='submitted') item.status='draft';
+    renderFiles();
+    updateProgress();
+  }
+
+  function toggleHelp(){
+    const el=document.getElementById('helpBox');
+    el.style.display = (el.style.display==='block') ? 'none' : 'block';
+  }
+
+  function saveDraft(silent=false){
+    const item = questions.find(x=>x.id===currentQId);
+    item.note = document.getElementById('noteBox').value || "";
+    if(item.status!=='submitted') item.status='draft';
+    document.getElementById('detailStatusPill').textContent = 'Status: Draft';
+    if(!silent){
+      document.getElementById('saveBanner').style.display='block';
+      setTimeout(()=>{document.getElementById('saveBanner').style.display='none';}, 1600);
+    }
+    updateProgress();
+  }
+
+  function submitQuestion(){
+    const item = questions.find(x=>x.id===currentQId);
+    item.note = document.getElementById('noteBox').value || "";
+
+    // Simple submission rule: must have at least 1 primary file
+    if(!(item.primary||[]).length){
+      alert('Please upload at least one Primary Evidence file before submitting.');
+      return;
+    }
+    item.status='submitted';
+    document.getElementById('detailStatusPill').textContent='Status: Submitted';
+    alert('Prototype: Evidence submitted for review (no compliance scoring shown here).');
+    updateProgress();
+  }
+
+  function updateProgress(){
+    // overall uses all questions (for prototype)
+    const total = questions.length;
+    const done = questions.filter(x=>x.status==='submitted').length;
+    const draft = questions.filter(x=>x.status==='draft').length;
+    const countText = `${done} submitted • ${draft} drafts • ${total-done-draft} not started`;
+    document.getElementById('progText').textContent = `${done} / ${total} submitted`;
+    document.getElementById('progBar').style.width = `${Math.max(4, Math.round((done/total)*100))}%`;
+  }
+
+  function gotoSummary(){
+    showScreen('screenSummary');
+    document.getElementById('topTitle').textContent='Section Summary';
+    renderSummary();
+  }
+
+  function renderSummary(){
+    const list = questions.filter(x=>x.dim===currentDim);
+    const wrap = document.getElementById('summaryTable');
+    wrap.innerHTML = "";
+    const table = document.createElement('div');
+    table.className = 'card pad';
+    table.style.boxShadow='none';
+    table.innerHTML = `<h2 style="margin:0 0 10px;">${dims[currentDim].title}</h2>
+      <div class="small">Status shown below is submission progress only.</div>`;
+    const rows = document.createElement('div');
+    rows.style.marginTop='10px';
+
+    list.forEach(item=>{
+      const row = document.createElement('div');
+      row.className='qcard';
+      row.innerHTML = `
+        <div class="qinfo">
+          <div class="small">${item.area}</div>
+          <p class="qname">${item.title}</p>
+        </div>
+        <div class="qright">
+          ${statusBadge(item.status)}
+          <button class="btn" onclick="openQuestion('${item.id}')">Open</button>
+        </div>
+      `;
+      rows.appendChild(row);
+    });
+
+    table.appendChild(rows);
+    wrap.appendChild(table);
+  }
+
+  // Initialize
+  renderQuestions();
+  updateProgress();
+</script>
+</body>
+</html>
